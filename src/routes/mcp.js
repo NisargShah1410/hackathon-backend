@@ -60,17 +60,22 @@ router.post("/analyze", async (req, res, next) => {
       interaction_type: interaction_type || "paste",
     });
 
-    // mcpResult is the JSON-RPC "result" object returned by the MCP server.
-    // It may contain the data directly, or nested inside a content array.
+    // mcpResult is the JSON-RPC "result" object.
+    // Structure: result.content[0].text → JSON string with { type, content: "<json>" }
+    //            → content is another JSON string with the actual keys.
     let responseData = mcpResult;
 
-    // If the MCP server wraps the result in a content array (common pattern),
-    // try to parse the first text content item.
     if (Array.isArray(mcpResult?.content)) {
       const textItem = mcpResult.content.find((c) => c.type === "text");
       if (textItem) {
         try {
-          responseData = JSON.parse(textItem.text);
+          const outer = JSON.parse(textItem.text);
+          // The actual data is inside outer.content as another JSON string
+          if (typeof outer.content === "string") {
+            responseData = JSON.parse(outer.content);
+          } else {
+            responseData = outer;
+          }
         } catch {
           responseData = mcpResult;
         }
@@ -78,7 +83,7 @@ router.post("/analyze", async (req, res, next) => {
     }
 
     const extracted = extractKeys(responseData);
-    res.json({ success: true, data: extracted });
+    res.json(extracted);
   } catch (err) {
     next(err);
   }
