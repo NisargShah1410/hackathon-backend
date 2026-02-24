@@ -83,7 +83,7 @@ router.post("/analyze", async (req, res, next) => {
     }
 
     const extracted = extractKeys(responseData);
-    res.json({ success: true, data: extracted });
+    res.json(extracted);
   } catch (err) {
     next(err);
   }
