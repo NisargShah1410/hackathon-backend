@@ -176,5 +176,22 @@ router.put("/update_artifact", async (req, res, next) => {
   }
 });
 
+router.get("/get_artifact", async (req, res, next) => {
+  try {
+  const artifactResult = await mcpClient.callTool("get_artifact", {
+    "key_pattern": process.env.ARTIFACT_NAME,
+  });
+
+  const artifactResultText=JSON.parse(artifactResult.content[0].text);
+  const artifactValueJSON=JSON.parse(artifactResultText.artifacts[0].value);
+
+  console.warn(artifactValueJSON);
+
+  res.json(artifactValueJSON);
+  } catch (err) {
+    next(err);
+  } 
+});
+
 
 module.exports = router;
