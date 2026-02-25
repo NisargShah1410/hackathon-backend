@@ -41,3 +41,23 @@
       ]
    }
 }
+
+
+
+{
+ "jsonrpc": "2.0",
+ "id": "create-dummy-agent-1",
+ "method": "tools/call",
+ "params": {
+   "name": "create_utility_agent",
+   "arguments": {
+     "name": "demo-dummy-agent",
+     "description": "Demo-only agent to prove create + attach-to-supervisor team flow.",
+     "objective": "Return a short, structured response and never expose secrets.",
+     "instruction": "SYSTEM RULES\n1) Output ONLY a single valid JSON object.\n2) No markdown, no commentary.\n3) Never output secrets. Redact anything sensitive.\n\nTASK\nGiven input text, return:\n{\n  \"message\": \"string\",\n  \"notes\": [\"string\"],\n  \"recommended_action\": \"ALLOW|WARN\"\n}\n\nLOGIC\n- If input mentions password/token/api_key/private key => recommended_action=\"WARN\" and message=\"Sensitive content detected\".\n- Else recommended_action=\"ALLOW\" and message=\"No sensitive markers detected\".\n- notes should include 1-3 bullets about what was found.",
+     "type_id": "54f6d2dd-f745-4f75-b58e-a5eaeac32370",
+     "model": "azure-gpt-4o",
+     "is_mcp_enabled": false
+   }
+ }
+}
