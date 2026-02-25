@@ -12,6 +12,11 @@ const config = {
       "x-cockpit-utility-agent-id":
         process.env.MCP_COCKPIT_UTILITY_AGENT_ID || "",
     },
+    agent: {
+      typeId: process.env.MCP_AGENT_TYPE_ID || "",
+      model: process.env.MCP_AGENT_MODEL || "",
+      isMcpEnabled: process.env.MCP_AGENT_MCP_ENABLED === "true",
+    },
   },
 };
 
