@@ -1,1 +1,43 @@
-Our service is calling https://internal-gateway.corp.local/v2/orders and timing out.Config:TIMEOUT_MS=30000RETRY_COUNT=3REGION=us-east-1Can you suggest what to check and how to reduce timeouts?
+{
+   "risk_score":0,
+   "risk_level":"LOW",
+   "risk_reasons":[
+      "Initial tool call to risk-scanner failed; recovered on retry"
+   ],
+   "detected_items":[
+      
+   ],
+   "intent_label":"debug_logs",
+   "intent_key":"debug_logs",
+   "intent_confidence":0.9,
+   "sanitized_content":"Here are logs. Find root cause.\n\njava.lang.NullPointerException at OrderService.java:118",
+   "recommended_action":"WARN",
+   "prior_intent_count":4,
+   "current_intent_count":5,
+   "artifact_loaded":true,
+   "content_length":88,
+   "content_preview_safe":"•••• ••• ••••. •••• •••• •••••.\n\n••••.••••.•••••••••••••••••••• •• ••••••••••••.••••:•••",
+   "should_create_agent":true,
+   "agent_blueprint":{
+      "name":"Debug Logs RCA Agent",
+      "objective":"Diagnose and explain root causes from application logs and stack traces, with actionable remediation steps.",
+      "instruction":"Ingest logs, extract stack traces, isolate the failing frame, identify likely null sources or misconfigurations, correlate with code around the referenced line, and propose verified fixes with next steps.",
+      "guardrails":[
+         "Never output secrets",
+         "Redact sensitive strings",
+         "Log all actions for auditability"
+      ],
+      "inputs":[
+         "Application logs",
+         "Stack traces",
+         "Source code snippet around failing line",
+         "Runtime/environment context"
+      ],
+      "outputs":[
+         "Root cause analysis",
+         "Evidence (relevant frames and lines)",
+         "Likely offending variable(s) or call path",
+         "Recommended remediation and verification steps"
+      ]
+   }
+}
