@@ -150,6 +150,9 @@ async function update_artifact(intent, risk_summary, risk_reasons, detected_item
     const artifactValueJSON=JSON.parse(artifactResultText.artifacts[0].value);
 
     // Increment the intent count
+    if (!artifactValueJSON.intent_counts[intent]) { 
+      artifactValueJSON.intent_counts[intent] = 1;
+    }
     artifactValueJSON.intent_counts[intent]+=1;
 
   // Increment the risk summary count
@@ -177,7 +180,7 @@ async function update_artifact(intent, risk_summary, risk_reasons, detected_item
 
     // Add intent reason
     if (intent_reasons){
-      artifactValueJSON.intent_reasons.push(...intent_reasons);
+      artifactValueJSON.intent_reasons.push(intent_reasons);
     }
 
     // Increment recommended action
