@@ -6,3 +6,44 @@ Request Body:
     "user_input": "Our service is calling https://internal-gateway.corp.local/v2/orders and timing out.Config:TIMEOUT_MS=30000RETRY_COUNT=3REGION=us-east-1Can you suggest what to check and how to reduce timeouts?",
     "interaction_type": "paste"
 }
+
+
+
+POST https://avanade-mcp-backend.azurewebsites.net/api/create-agent
+
+Request Body:
+
+{
+    "risk_score": 0,
+    "risk_level": "LOW",
+    "risk_reasons": [],
+    "detected_items": [],
+    "sanitized_content": "<string>",
+    "recommended_action": "ALLOW",
+    "intent_key": "debug_logs",
+    "intent_label": "debug_logs",
+    "intent_confidence": 0.9,
+    "should_create_agent": true,
+    "agent_blueprint": {
+      "name":"Debug Logs RCA Agent 1234",
+      "objective":"Diagnose and explain root causes from application logs and stack traces, with actionable remediation steps.",
+      "instruction":"Ingest logs, extract stack traces, isolate the failing frame, identify likely null sources or misconfigurations, correlate with code around the referenced line, and propose verified fixes with next steps.",
+      "guardrails":[
+         "Never output secrets",
+         "Redact sensitive strings",
+         "Log all actions for auditability"
+      ],
+      "inputs":[
+         "Application logs",
+         "Stack traces",
+         "Source code snippet around failing line",
+         "Runtime/environment context"
+      ],
+      "outputs":[
+         "Root cause analysis",
+         "Evidence (relevant frames and lines)",
+         "Likely offending variable(s) or call path",
+         "Recommended remediation and verification steps"
+      ]
+   }
+}
