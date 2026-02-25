@@ -115,15 +115,19 @@ router.post("/create-agent", async (req, res, next) => {
     const config = require("../config");
 
     // Build the MCP call arguments from the blueprint
-    const mcpResult = await mcpClient.callTool("create_utility_agent", {
-      name: agent_blueprint.name,
-      description: agent_blueprint.objective || agent_blueprint.name,
-      objective: agent_blueprint.objective || "",
-      instruction: JSON.stringify(agent_blueprint),
-      type_id: config.mcp.agent.typeId,
-      model: config.mcp.agent.model,
-      is_mcp_enabled: config.mcp.agent.isMcpEnabled,
-    });
+    const mcpResult = await mcpClient.callTool(
+      "create_utility_agent",
+      {
+        name: agent_blueprint.name,
+        description: agent_blueprint.objective || agent_blueprint.name,
+        objective: agent_blueprint.objective || "",
+        instruction: JSON.stringify(agent_blueprint),
+        type_id: config.mcp.agent.typeId,
+        model: config.mcp.agent.model,
+        is_mcp_enabled: config.mcp.agent.isMcpEnabled,
+      },
+      { serverUrl: config.mcp.agent.serverUrl }
+    );
 
     // Return the raw MCP response for the create call
     res.json(mcpResult);
