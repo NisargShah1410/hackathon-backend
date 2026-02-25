@@ -89,4 +89,47 @@ router.post("/analyze", async (req, res, next) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// POST /api/create-agent
+//
+// Frontend sends the same JSON structure returned by /api/analyze.
+// The agent_blueprint is used to build the create_utility_agent MCP call.
+// ---------------------------------------------------------------------------
+router.post("/create-agent", async (req, res, next) => {
+  try {
+    const { should_create_agent, agent_blueprint } = req.body;
+
+    if (!should_create_agent) {
+      return res.status(400).json({
+        error: "should_create_agent is false or missing; agent creation skipped.",
+      });
+    }
+
+    if (!agent_blueprint || !agent_blueprint.name || !agent_blueprint.instruction) {
+      return res.status(400).json({
+        error:
+          "Missing required field: agent_blueprint must include at least name and instruction.",
+      });
+    }
+
+    const config = require("../config");
+
+    // Build the MCP call arguments from the blueprint
+    const mcpResult = await mcpClient.callTool("create_utility_agent", {
+      name: agent_blueprint.name,
+      description: agent_blueprint.objective || agent_blueprint.name,
+      objective: agent_blueprint.objective || "",
+      instruction: JSON.stringify(agent_blueprint),
+      type_id: config.mcp.agent.typeId,
+      model: config.mcp.agent.model,
+      is_mcp_enabled: config.mcp.agent.isMcpEnabled,
+    });
+
+    // Return the raw MCP response for the create call
+    res.json(mcpResult);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
