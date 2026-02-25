@@ -1,0 +1,8 @@
+POST https://avanade-mcp-backend.azurewebsites.net/api/analyze
+
+Request Body:
+
+{
+    "user_input": "Our service is calling https://internal-gateway.corp.local/v2/orders and timing out.Config:TIMEOUT_MS=30000RETRY_COUNT=3REGION=us-east-1Can you suggest what to check and how to reduce timeouts?",
+    "interaction_type": "paste"
+}
