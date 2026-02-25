@@ -6,9 +6,11 @@ let requestId = 0;
  * Send a JSON-RPC 2.0 request to the MCP server.
  * @param {string} method  - The MCP method (e.g. "tools/call", "tools/list").
  * @param {object} params  - The params object for the method.
+ * @param {object} [options]         - Optional overrides.
+ * @param {string} [options.serverUrl] - Override the default MCP server URL.
  * @returns {Promise<object>} The parsed JSON-RPC result.
  */
-async function sendRequest(method, params = {}) {
+async function sendRequest(method, params = {}, options = {}) {
   requestId += 1;
 
   const body = {
@@ -25,7 +27,9 @@ async function sendRequest(method, params = {}) {
     ...config.mcp.headers,
   };
 
-  const response = await fetch(config.mcp.serverUrl, {
+  const targetUrl = options.serverUrl || config.mcp.serverUrl;
+
+  const response = await fetch(targetUrl, {
     method: "POST",
     headers,
     body: JSON.stringify(body),
@@ -54,9 +58,11 @@ async function sendRequest(method, params = {}) {
  * Call a tool on the MCP server.
  * @param {string} name - The tool name.
  * @param {object} args - The tool arguments.
+ * @param {object} [options]         - Optional overrides.
+ * @param {string} [options.serverUrl] - Override the default MCP server URL.
  */
-async function callTool(name, args = {}) {
-  return sendRequest("tools/call", { name, arguments: args });
+async function callTool(name, args = {}, options = {}) {
+  return sendRequest("tools/call", { name, arguments: args }, options);
 }
 
 module.exports = {
