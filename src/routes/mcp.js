@@ -64,6 +64,7 @@ router.post("/analyze", async (req, res, next) => {
     // Structure: result.content[0].text → JSON string with { type, content: "<json>" }
     //            → content is another JSON string with the actual keys.
     let responseData = mcpResult;
+    console.warn(mcpResult);
 
     if (Array.isArray(mcpResult?.content)) {
       const textItem = mcpResult.content.find((c) => c.type === "text");
@@ -83,6 +84,10 @@ router.post("/analyze", async (req, res, next) => {
     }
 
     const extracted = extractKeys(responseData);
+    try {
+      // Update artifact
+      update_artifact(extracted.intent_key, extracted.risk_level, extracted.risk_reasons, extracted.detected_items, extracted.intent_label, extracted.recommended_action, extracted.should_create_agent);
+    } catch (err){}
     res.json(extracted);
   } catch (err) {
     next(err);
@@ -136,32 +141,7 @@ router.post("/create-agent", async (req, res, next) => {
   }
 });
 
-/* UPDATE /api/mcp/update_artifact
-Frontend sends:
-"artifact_fields": {                 
-  "intent":"debug_logs",                      //debug_logs, summarize, generate_docs, explain_code, draft_message, other
-  "risk_summary":"LOW|MEDIUM|HIGH|PROMPT",
-  "risk_reason": "<text>",                    // optional
-  "detected_item": "<text>",                  // optional
-  "intent_reason": "<text>",                  // optional
-  "recommended_action": "ALLOW|WARN|REDACT",
-  "agent_created: bool,                       // optional
-}
-*/
-
-router.put("/update_artifact", async (req, res, next) => {
-  try {
-    const { intent, risk_summary, risk_reason, detected_item,
-            intent_reason, recommended_action, agent_created
-    } = req.body.artifact_fields;
-
-    if (!intent) {
-      return res.status(400).json({
-        success: false,
-        error: "Missing required field: intent",
-      });
-    }
-
+async function update_artifact(intent, risk_summary, risk_reasons, detected_items, intent_reasons, recommended_action, agent_created) {
     // Get the artifact via the mcp api
     const artifactResult = await mcpClient.callTool("get_artifact", {
       "key_pattern": process.env.ARTIFACT_NAME,
@@ -172,8 +152,7 @@ router.put("/update_artifact", async (req, res, next) => {
     // Increment the intent count
     artifactValueJSON.intent_counts[intent]+=1;
 
-    console.warn(artifactValueJSON);
-    // Increment the risk summary count
+  // Increment the risk summary count
     const artifactRiskSummaryJSON = artifactValueJSON.risk_summary;
     console.warn(risk_summary);
     if (risk_summary == "LOW" ) {
@@ -187,18 +166,18 @@ router.put("/update_artifact", async (req, res, next) => {
     }
 
     // Append to risk reasons
-    if (risk_reason) {
-      artifactValueJSON.risk_reasons.push(risk_reason);
+    if (risk_reasons) {
+      artifactValueJSON.risk_reasons.push(...risk_reasons);
     }
-    
+
     // Add detected item
-    if (detected_item) {
-      artifactValueJSON.detected_items.push(detected_item);
+    if (detected_items) {
+      artifactValueJSON.detected_items.push(...detected_items);
     }
 
     // Add intent reason
-    if (intent_reason){
-      artifactValueJSON.intent_reasons.push(intent_reason);
+    if (intent_reasons){
+      artifactValueJSON.intent_reasons.push(...intent_reasons);
     }
 
     // Increment recommended action
@@ -213,20 +192,7 @@ router.put("/update_artifact", async (req, res, next) => {
       "id": process.env.ARTIFACT_ID,
       "value": JSON.stringify(artifactValueJSON),
     });
-
-    if (JSON.parse(updateResult.content[0].text).success == false) {
-      return res.status(500).json({
-        success:false,
-        error: "Request to MCP failed"
-      });
-    }
-    console.warn(updateResult);
-
-    res.json({sucess:true, intent:this.intent, new_count: artifactValueJSON[intent]})
-  } catch (err) {
-    next(err);
-  }
-});
+}
 
 router.get("/get_artifact", async (req, res, next) => {
   try {
